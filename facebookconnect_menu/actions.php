@@ -23,13 +23,12 @@ require_once("../../class2.php");
 require_once("config.php");
 require_once("functions.php");
 require_once("facebook.php");
+ if (!$facebook) {
+$facebook= new Facebook($config);
+ }
+ $access_token = $facebook->getAccessToken();
+$uid=$facebook->getUser();
 
-$facebook = new Facebook(array(
-  'appId'  => FACEBOOK_APP_ID,
-  'secret' => FACEBOOK_SECRET,
-));
-$access_token = $facebook->getAccessToken();
-$uid = $facebook->getUser();
 
 /*-------------------------------
 |Check page for queries
@@ -37,10 +36,15 @@ $uid = $facebook->getUser();
 //Check for Referring Page
 $refer = urldecode($_GET['refer']);
 //Check for FB Login to Link Accounts
-$fbloggedin = @$_GET['linkaccount'];
-if ($fbloggedin == "yes"){
+$fblinkaccount = @$_GET['linkaccount'];
+if ($fblinkaccount == "yes"){
 $updateuser = updateUser($currentUser['user_id'],$uid);
+IF ($updateuser === TRUE){
 echo  "<script type=\"text/javascript\">window.top.location= '".$refer."'; </script>";
+}
+Else {
+echo "<script type=\"text/javascript\">window.top.location= '".$_SESSION['refer']."?error=fbidexists'; </script>";	
+}
 }
 $fblogin = @$_GET['login'];
 if ($fblogin == "yes"){
