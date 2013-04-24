@@ -34,7 +34,7 @@ $create = "CREATE TABLE ".MPREFIX."facebookconnect (
 	e107_id int(10) NOT NULL,
 	fb_id VARCHAR( 60 ) NOT NULL ,
 PRIMARY KEY ( e107_id)
-	) TYPE=MyISAM;
+	);
 ";
 mysql_query($create) or die('Could not create table: '.$create.'<br>SQL Returned Error: '.mysql_error());
 $text .= "Table $FBConnect created.<br>";
