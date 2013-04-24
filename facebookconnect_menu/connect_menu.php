@@ -19,61 +19,55 @@ global $currentUser;
 session_start();
 // store session data
 $_SESSION['refer']=e_SELF;
-
 //Check Script for Errors
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 //Call e107 Class to determine user status
 if (!defined('e107_INIT')) { exit; }
-require(e_PLUGIN ."/facebookconnect_menu/config.php");
-require(e_PLUGIN ."/facebookconnect_menu/functions.php");
-require_once("facebook.php");
-
-$facebook = new Facebook(array(
-  'appId'  => FACEBOOK_APP_ID,
-  'secret' => FACEBOOK_SECRET,
-));
+//Get required plugins
+require_once(e_PLUGIN ."/facebookconnect_menu/config.php");
+require_once(e_PLUGIN ."/facebookconnect_menu/functions.php");
+require_once(e_PLUGIN ."/facebookconnect_menu/facebook.php");
+$facebook= new Facebook($config);
 $access_token = $facebook->getAccessToken();
-$uid = $facebook->getUser();
+$uid=$facebook->getUser();
+if ($uid > 0) { 
+
+	//$_SESSION['access_token'] = $facebook->getAccessToken();
+	//$_SESSION['user'] = $facebook->api('/me','GET');
+	$my_url = "http://kool2zero.com/test";
+	$_SESSION['state'] = md5( uniqid( rand( ), true)); // CSRF protection
+	$dialog_url = "https://www.facebook.com/dialog/oauth?client_id=" . FACEBOOK_APP_ID . "&redirect_uri=" . urlencode( $my_url) . "&state=" . $_SESSION['state'] . "&scope=".$comma_separated;
  $user_profile = $facebook->api('/me','GET');
+}
 //Check Query String for Error
 $error = @$_GET['error'];
 if ($error == "create"){
-$displayerror = "<b>Facebook returned an error while creating your account</b>";
+	$displayerror = "<b>Facebook returned an error while creating your account</b><br>";
 }
 if ($error == "nouser"){
-$displayerror = "<center>To use Facebook Connect, you must already have a user account on this website that was approved by an administrator.<hr>If you do, log in normally to the website and click \"Link Account\".  Once you do this, you can login using using your Facebook credentials by clicking, \"Connect With Facebook\".<hr>If you do not have an account yet, <a href=\"".e_HTTP."signup.php\">click here</a> to sign up for a new account!</center>";
+	$displayerror = "<center>To use Facebook Connect, you must already have a user account on this website that was approved by an administrator.<hr>If you do, log in normally to the website and click \"Link Account\".  Once you do this, you can login using using your Facebook credentials by clicking, \"Connect With Facebook\".<hr>If you do not have an account yet, <a href=\"".e_HTTP."signup.php\">click here</a> to sign up for a new account!</center>";
 }
+if ($error == "fbidexists"){
+	$displayerror = "<center>This Facebook User has already connected to a different account.</center>";
+}
+
+
 //Start preliminary text
 $caption = "Login with Facebook!";
-$text = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"> ";
-$text .= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:fb=\"http://www.facebook.com/2008/fbml\">";
+$text = "<!doctype html>";
 $text .= "<head>";
 $text .= "<script type=\"text/javascript\">";
 $text .= "function LinkAccounts(){ window.location = \"".e_PLUGIN ."facebookconnect_menu/actions.php?linkaccount=yes\";}";
 $text .= "function Login(){window.location = \"".e_PLUGIN ."facebookconnect_menu/actions.php?login=yes&\";}";
-$text .= "FB.Connect.ifUserConnected(set_cookies_and_refresh());";
+//$text .= "FB.Connect.ifUserConnected(set_cookies_and_refresh());";
 $text .= "</script>";
 $text .= "</head><body>";
 $text .= "<center>";
 
 $text .= "<div id=\"facebookDIV\">";
 $text .= $displayerror;
-//Check to see if e107 user has a Facebook ID attached
-function checkUser($userid){
-global $currentUser;
-$selectsql = "SELECT * FROM e107_facebookconnect WHERE e107_id='".$userid."'";
-$result = mysql_query($selectsql);
-if (!$result) {die('Could Not Do Selection<br>'.$selectsql);}
-$row = mysql_fetch_array($result, MYSQL_BOTH);
-if (!$row['fb_id'] || $row['fb_id'] == "" || $row['fb_id'] == null){
-return false;
-}
-else {
-$return = $row['fb_id'];
-return $return;
-}
-}
+
 //Connect to e107 database
 //dbFBConnect();
 
@@ -82,19 +76,13 @@ return $return;
 			$fbid = checkUser($currentUser['user_id']);
 				//If User is Not Connected With Facebook Ask to Link Account
 				if (!$fbid || $fbid == "" || $fbid == false){
-					$text .= $user_profile['name'].", would you like to link your account with Facebook?<br>";
-						//Check to see if user is already connected to Facebook
-						if($uid == 0){
-							$text .= "<fb:login-button perms=\"email,user_birthday\" onlogin=\"LinkAccounts();\">Link Account with Facebook</fb:login-button>";
+					$text .= USERNAME. ", would you like to <a href=\"".e_PLUGIN ."facebookconnect_menu/actions.php?linkaccount=yes\">link your account with Facebook?</a><br>";
+					$text .= "<div class=\"fb-login-button\" data-show-faces=\"true\" data-width=\"200\" data-max-rows=\"1\" data-scope=\"email,user_birthday\" data-onlogin=\"LinkAccounts();\">Link Accounts</div>";
+					
 											}
-						//If the user is connected to Facebook and logged in, ask to link accounts.
-						else {
-							$text .= "<fb:login-button perms=\"email,user_birthday\" onlogin=\"LinkAccounts();\">Link Account with Facebook</fb:login-button>";
-								}
-										}
 				else {
 					if($uid == 0){
-						$text .= "<fb:login-button perms=\"email,user_birthday\" onlogin=\"Login();\">Connect with Facebook</fb:login-button>";
+						$text .= "<div class=\"fb-login-button\" data-show-faces=\"true\" data-width=\"200\" data-max-rows=\"1\" data-scope=\"email,user_birthday\" data-onlogin=\"Login();\"></div>";
 										}
 					else{
 						$text .= "<img src=\"https://graph.facebook.com/".$uid."/picture\"/><br>Welcome, ".$user_profile['name'];
