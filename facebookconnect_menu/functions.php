@@ -18,11 +18,33 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 require_once("config.php");
+require_once( "facebook.php");
+//Facebook Config
+$config=array( );
+$config['appId']=FACEBOOK_APP_ID;
+$config['secret']=FACEBOOK_SECRET;
+$config['fileUpload']=false; // optional
+$facebook=new Facebook($config);
+$uid=$facebook->getUser();
+if ($uid >0) { 
+	$_SESSION['access_token'] = $facebook->getAccessToken();
+} 
 //Update user record with Facebook ID
 function updateUser($userid, $fbid){
+	//First find the e107 ID from the Facebook Connect table
+	$selectsql = "SELECT count(e107_id) FROM e107_facebookconnect WHERE fb_id='".$fbid."'";
+	$result = mysql_query($selectsql);
+	if (!$result) {die('Could Not Do Selection to get e107 ID<br>'.$selectsql);}
+	$row = mysql_fetch_array($result, MYSQL_BOTH);
+	if ($row[0] > 0) {
+		return FALSE;
+	}
+	else {
 $updatesql = "INSERT INTO e107_facebookconnect (e107_id,fb_id) VALUES (".$userid.",'".$fbid."')";
 //$updatesql = "UPDATE e107_user SET fbid='".$fbid."' WHERE user_id=".$userid;
 mysql_query($updatesql) or die('Could not update: '.$updatesql);
+return TRUE;
+	}
 }
 //Login to e107
 function loginfromFacebook($fbid){
@@ -168,7 +190,8 @@ $js =  "<div id=\"fb-root\"></div>
               appId      : '".FACEBOOK_APP_ID."', // App ID
               status     : true, // check login status
               cookie     : true, // enable cookies to allow the server to access the session
-              xfbml      : true  // parse XFBML
+	xfbml: true,
+	oauth: true
             });
         FB.Event.subscribe('auth.login', function(response) {
           window.location.reload();
@@ -185,5 +208,22 @@ $js =  "<div id=\"fb-root\"></div>
         </script>";
 		return $js;
 		
+}
+
+
+//Check to see if e107 user has a Facebook ID attached
+function checkUser($userid){
+	global $currentUser;
+	$selectsql = "SELECT * FROM e107_facebookconnect WHERE e107_id='".$userid."'";
+	$result = mysql_query($selectsql);
+	if (!$result) {die('Could Not Do Selection<br>'.$selectsql);}
+	$row = mysql_fetch_array($result, MYSQL_BOTH);
+	if (!$row['fb_id'] || $row['fb_id'] == "" || $row['fb_id'] == null){
+		return false;
+	}
+	else {
+		$return = $row['fb_id'];
+		return $return;
+	}
 }
 ?>
