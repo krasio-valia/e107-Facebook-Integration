@@ -63,7 +63,7 @@ $text .= "function Login(){window.location = \"".e_PLUGIN ."facebookconnect_menu
 //$text .= "FB.Connect.ifUserConnected(set_cookies_and_refresh());";
 $text .= "</script>";
 $text .= "</head><body>";
-$text .= "<center>";
+//$text .= "<center>";
 
 $text .= "<div id=\"facebookDIV\">";
 $text .= $displayerror;
@@ -90,13 +90,13 @@ $text .= $displayerror;
 					}
 											}
 		else{
-				$text .= "<fb:login-button perms=\"email,user_birthday\" onlogin=\"Login();\">Connect with Facebook</fb:login-button>";
+				$text .= "<div class=\"fb-login-button\" data-show-faces=\"true\" data-width=\"200\" data-max-rows=\"1\" data-scope=\"email,user_birthday\" data-onlogin=\"Login();\">Connect with Facebook</div>";
 			}
 		
 $text .= "</div>";
 
 $text .= loadFBjs();
-$text .= "</center>";
+//$text .= "</center>";
 $text .= "</body></html>";
 //Set to Table
 $ns -> tablerender($caption, $text);
