@@ -39,7 +39,7 @@ $create = "CREATE TABLE ".MPREFIX."facebookconnect (
 	e107_id int(10) NOT NULL,
 	fb_id VARCHAR( 60 ) NOT NULL ,
 PRIMARY KEY ( e107_id)
-	) TYPE=MyISAM;
+	);
 ";
 mysql_query($create) or die('Could not create table: '.$create.'<br>SQL Returned Error: '.mysql_error());
 $text .= "Table $FBConnect created.<br>";
@@ -86,6 +86,9 @@ $text .= $mainpage;
 if (!$action){
 $caption = "Work with Facebook Connect";
 $text .= "<center>";
+	if (!FACEBOOK_APP_ID || !FACEBOOK_SECRET) {
+		$text .= "<span style='color: red;'><b>Facebook App ID and/or Secret are not specified in config.php.  This plugin will not work until they are specified.</b></span> <hr>";
+	}
 $text .= "<a href=\"".e_SELF."?action=facebookusers\">Show users who use Facebook Connect</a><hr>";
 $text .= "</center>";
 }
