@@ -24,5 +24,6 @@ $accountcreation = "Y";
 
 //Other Constants
 define('GRAPHAPI', 'https://graph.facebook.com/');
-
+//When someone presses the login button, the page should redirect here
+define('REDIRECT_URL', '');
 ?>

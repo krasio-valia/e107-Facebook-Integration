@@ -35,9 +35,9 @@ if ($uid > 0) {
 
 	//$_SESSION['access_token'] = $facebook->getAccessToken();
 	//$_SESSION['user'] = $facebook->api('/me','GET');
-	$my_url = "http://kool2zero.com/test";
+	
 	$_SESSION['state'] = md5( uniqid( rand( ), true)); // CSRF protection
-	$dialog_url = "https://www.facebook.com/dialog/oauth?client_id=" . FACEBOOK_APP_ID . "&redirect_uri=" . urlencode( $my_url) . "&state=" . $_SESSION['state'] . "&scope=".$comma_separated;
+	$dialog_url = "https://www.facebook.com/dialog/oauth?client_id=" . FACEBOOK_APP_ID . "&redirect_uri=" . urlencode( REDIRECT_URL) . "&state=" . $_SESSION['state'] . "&scope=".$comma_separated;
  $user_profile = $facebook->api('/me','GET');
 }
 //Check Query String for Error
